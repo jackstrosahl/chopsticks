@@ -4,31 +4,35 @@ import queue
 # Only 2 for now
 num_hands = 2
 num_players = 2
-rollover = 3
+rollover = 5
 start_hand = (1,1)
 
 state = (0,*(start_hand for _ in range(num_players)))
 q = queue.Queue()
 explored = set()
 q.put(state)
-moves = defaultdict(list)
+position_set = set()
 
 while not q.empty():
     state = q.get()
     move, *players = state
     turn = move % num_players
     position = (turn, *players)
-    if position in explored:
+    alt_position = tuple(players if turn == 0 else reversed(players))
+    if alt_position in explored:
         continue
 
     cur_player = players[turn]
     next_move = move + 1
     # Generate all transfers and divisions
     sum_fingers = sum(cur_player)
+
+    position_set.add(alt_position)
+    explored.add(alt_position)
+
     if sum_fingers == 0:
-        moves[move] = players
-        explored.add(position)
         continue
+
     min_hand = min(cur_player)
     assert sum_fingers <= (rollover-1)*num_hands
     for fingers in range(1,min(sum_fingers+1,rollover)):
@@ -57,9 +61,5 @@ while not q.empty():
                 new_players = players[:]
                 new_players[opp_i] = tuple(sorted(new_player))
                 q.put((next_move,*new_players))
-    
-    moves[move].append(players)
-    explored.add(position)
 
-print("\n".join(str(x) for x in moves.items()))
 print(len(explored))
