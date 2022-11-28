@@ -1,3 +1,4 @@
+from math import inf
 from networkx import DiGraph, draw
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import graphviz_layout
@@ -11,8 +12,9 @@ num_hands = 2
 num_players = 2
 rollover = 5
 start_hand = (1,1)
+start_position = tuple(start_hand for _ in range(num_players))
 
-state = (0,tuple(start_hand for _ in range(num_players)),None)
+state = (0,start_position,None)
 q = queue.Queue()
 explored = set()
 q.put(state)
@@ -22,12 +24,11 @@ while not q.empty():
     state = q.get()
     move, position, parent = state
     if parent is not None:
-        graph.add_edge(pos_string(parent),pos_string(position))
+        graph.add_edge(parent,position)
     if position in explored:
         continue
     explored.add(position)
     
-
     cur_player = position[0]
     next_move = move + 1        
     
@@ -41,8 +42,6 @@ while not q.empty():
         q.put((next_move, tuple(new_position), position))
 
     sum_fingers = sum(cur_player)
-
-    
 
     # Generate all transfers and divisions
     if sum_fingers == 0:
@@ -73,6 +72,28 @@ while not q.empty():
                 queue_move(tuple(sorted(new_player)),opp_i)
 
 print(len(explored))
-pos = graphviz_layout(graph, prog="dot")
-draw(graph, pos, with_labels=True, node_size=800)
-plt.show()
+# pos = graphviz_layout(graph, prog="dot")
+# draw(graph, pos, with_labels=True, node_size=800)
+# plt.show()
+
+best_moves = {}
+def negamax(position, player):
+    print(position)
+    best_move = best_moves.get(position)
+    if best_move is not None:
+        return abs(best_move)*player
+    succs = list(graph.successors(position))
+    if len(succs) == 0:
+        print("b")
+        best_moves[position] = player
+        return player
+    value = -inf
+    for succ in succs:
+        alt = negamax(succ, -player)
+        if alt > value:
+            value = alt
+            print("a")
+            best_moves[position] = value
+    return value
+
+print(negamax(start_position, 1))
