@@ -77,23 +77,22 @@ print(len(explored))
 # plt.show()
 
 best_moves = {}
+nm_explored = set()
 def negamax(position, player):
-    print(position)
-    best_move = best_moves.get(position)
-    if best_move is not None:
-        return abs(best_move)*player
+    explored_key = (position,player)
+    if explored_key in nm_explored:
+        return 0
+    nm_explored.add(explored_key)
     succs = list(graph.successors(position))
     if len(succs) == 0:
-        print("b")
-        best_moves[position] = player
         return player
     value = -inf
     for succ in succs:
-        alt = negamax(succ, -player)
+        alt = -negamax(succ, -player)
         if alt > value:
             value = alt
-            print("a")
-            best_moves[position] = value
+
+    best_moves[position] = value
     return value
 
 print(negamax(start_position, 1))
