@@ -85,14 +85,18 @@ def negamax(position, player):
     nm_explored.add(explored_key)
     succs = list(graph.successors(position))
     if len(succs) == 0:
+        best_moves[position] = None
         return player
     value = -inf
+    best_move = None
     for succ in succs:
         alt = -negamax(succ, -player)
         if alt > value:
             value = alt
+            best_move = succ
 
-    best_moves[position] = value
+    best_moves[position] = best_move
     return value
 
 print(negamax(start_position, 1))
+print(best_moves)
