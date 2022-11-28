@@ -99,4 +99,23 @@ def negamax(position, player):
     return value
 
 print(negamax(start_position, 1))
-print(best_moves)
+
+real_player = int(input("Which player would you like to be? (1 or 2): "))-1
+position = start_position
+move = 0
+while position is not None:
+    print(position)
+    turn = move % 2
+    succs = list(graph.successors(position))
+    if len(succs) == 0:
+        position = None
+        break
+    if turn == real_player:
+        print("Which move?")
+        for i, succ in enumerate(succs,1):
+            print(f"{i}: {succ}")
+        position = succs[int(input())-1]
+    else:
+        position = best_moves[position]
+        print("AI Chose")
+    move += 1
